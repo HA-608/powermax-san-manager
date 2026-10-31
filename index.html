@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dell PowerMax Enterprise SAN Manager & Telemetry Center</title>
+  
+  <!-- Modern Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app-container">
+    
+    <!-- Top Enterprise Header -->
+    <header class="top-header">
+      <div class="brand-section">
+        <div class="brand-logo-badge">DELL EMC</div>
+        <div class="brand-title">
+          PowerMax SAN Manager
+          <span class="tag">Unisphere v10.1</span>
+        </div>
+      </div>
+
+      <div class="header-status-pills">
+        <div class="status-pill" id="header-conn-status" style="cursor:pointer;" onclick="openAuthModal()" title="Click to edit Unisphere Credentials">
+          <div class="pulse-dot"></div>
+          <span>Array SN: <strong id="header-sn-display">000197900123</strong></span>
+        </div>
+
+        <div class="status-pill">
+          <span>Storage Pool: <strong style="color:var(--accent-emerald);">OPTIMAL</strong></span>
+        </div>
+
+        <div class="status-pill">
+          <span>Global Health: <strong style="color:var(--dell-cyan);">98%</strong></span>
+        </div>
+
+        <!-- Prominent Credentials & Settings Button -->
+        <button class="btn btn-primary" style="padding:6px 14px; font-size:12px; background:linear-gradient(135deg, #0076ce, #00f2fe); color:#fff; box-shadow:0 0 12px rgba(0,242,254,0.3);" onclick="openAuthModal()">
+          <i data-lucide="key"></i> Credentials & Array Config
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-Header Tab Navigation -->
+    <nav class="nav-bar">
+      <button class="nav-tab active" data-tab="dashboard">
+        <i data-lucide="layout-dashboard"></i> Executive Dashboard
+      </button>
+      <button class="nav-tab" data-tab="performance">
+        <i data-lucide="activity"></i> Telemetry & Performance
+      </button>
+      <button class="nav-tab" data-tab="topology">
+        <i data-lucide="network"></i> SAN Fabric Topology
+      </button>
+      <button class="nav-tab" data-tab="storage">
+        <i data-lucide="layers"></i> Storage Groups & Masking
+      </button>
+      <button class="nav-tab" data-tab="hardware">
+        <i data-lucide="cpu"></i> Rack Hardware & NVMe
+      </button>
+      <button class="nav-tab" data-tab="replication">
+        <i data-lucide="refresh-cw"></i> SRDF & SnapVX Protection
+      </button>
+      <button class="nav-tab" data-tab="alerts">
+        <i data-lucide="alert-triangle"></i> Diagnostics & Event Log <span class="badge">4</span>
+      </button>
+      <button class="nav-tab" data-tab="api">
+        <i data-lucide="code"></i> Unisphere REST API
+      </button>
+    </nav>
+
+    <!-- Main Active View Container -->
+    <main class="main-content" id="tab-view-container">
+      <!-- Dynamic View Rendered Here -->
+    </main>
+  </div>
+
+  <!-- Unisphere Array Credentials & Endpoint Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i data-lucide="shield-check"></i> Unisphere Array Connection & Credentials</h3>
+        <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+      </div>
+
+      <form id="authForm">
+        <div class="form-group">
+          <label>Unisphere Host / Endpoint URL</label>
+          <input type="text" id="authEndpointInput" class="text-input" style="width:100%; font-family:'JetBrains Mono', monospace;" value="https://192.168.100.45:8443" required>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Symmetrix Array Serial Number (12 Digits)</label>
+            <input type="text" id="authSnInput" class="text-input" style="width:100%; font-family:'JetBrains Mono', monospace;" value="000197900123" required>
+          </div>
+
+          <div class="form-group">
+            <label>Unisphere REST API Version</label>
+            <select id="authApiVerInput" class="select-input" style="width:100%;">
+              <option value="101" selected>v10.1 (PowerMax OS 10)</option>
+              <option value="100">v10.0 (PowerMax OS 10)</option>
+              <option value="92">v9.2 (PowerMax OS 5978)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Unisphere Username</label>
+            <input type="text" id="authUserInput" class="text-input" style="width:100%;" value="smc" required>
+          </div>
+
+          <div class="form-group">
+            <label>Unisphere Password</label>
+            <input type="password" id="authPassInput" class="text-input" style="width:100%;" value="smc3000" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="background:rgba(0,118,206,0.1); border:1px solid rgba(0,118,206,0.3); padding:12px; border-radius:8px; margin-top:8px;">
+          <div style="font-size:12px; color:var(--dell-cyan); font-weight:600; margin-bottom:4px;">
+            <i data-lucide="lock"></i> Authentication & Session Management
+          </div>
+          <div style="font-size:11px; color:var(--text-muted);">
+            Credentials generate HTTP Basic / Bearer JWT headers for REST calls to <code>/univmax/restapi/...</code>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeAuthModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Connect & Save Credentials</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Storage Group & Masking View Provisioning Modal -->
+  <div class="modal-overlay" id="provisionModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i data-lucide="plus-circle"></i> Provision New PowerMax Storage Group</h3>
+        <button class="close-btn" onclick="closeProvisionModal()">&times;</button>
+      </div>
+
+      <form id="provisionForm">
+        <div class="form-group">
+          <label>Storage Group Name</label>
+          <input type="text" id="sgNameInput" class="text-input" style="width:100%;" placeholder="e.g. SG_PRD_Analytics_Cluster" required>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Service Level Target (SLO)</label>
+            <select id="sloSelect" class="select-input" style="width:100%;">
+              <option value="Diamond">Diamond (0.5ms Response Target)</option>
+              <option value="Platinum" selected>Platinum (1.0ms Target)</option>
+              <option value="Gold">Gold (3.0ms Target)</option>
+              <option value="Silver">Silver (6.0ms Target)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Allocated Capacity (TB)</label>
+            <input type="number" id="sizeInput" class="text-input" style="width:100%;" value="10" min="1" max="100" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Target Host / Initiator Group</label>
+          <select id="hostSelect" class="select-input" style="width:100%;">
+            <option value="HOST_ORACLE_CLUSTER">HG_Oracle_RAC_Nodes (4 Host HBAs)</option>
+            <option value="HOST_SAP_DB01">HG_SAP_HANA_Hosts (NVMe-oF RoCEv2)</option>
+            <option value="HOST_VMWARE_CLUSTER_01">HG_ESXi_Cluster_01 (8 HBAs)</option>
+            <option value="HOST_SQL_AG01">HG_SQL_Nodes (4 HBAs)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" checked style="accent-color:var(--dell-cyan);">
+            Enable Inline Data Reduction (Deduplication & Compression 4:1 Ratio)
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+          <button type="button" class="btn btn-secondary" onclick="closeProvisionModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Create Masking View & Provision LUNs</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Include App Scripts -->
+  <script src="data.js"></script>
+  <script src="topology.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
